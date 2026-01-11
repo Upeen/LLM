@@ -1,17 +1,17 @@
 import streamlit as st
-from llm import load_llm, MODEL_LIST
+from llm import load_model, MODEL_LIST
 
 st.set_page_config(
     page_title="Free Streamlit LLM",
     layout="wide"
 )
 
-st.title("⚡ Free & Lightweight LLM on Streamlit")
+st.title("⚡ Free Lightweight LLM (Streamlit)")
 
-# Sidebar controls
+# Sidebar
 st.sidebar.header("⚙️ Settings")
 model_choice = st.sidebar.selectbox(
-    "Choose Model",
+    "Select Model",
     list(MODEL_LIST.keys())
 )
 
@@ -20,14 +20,13 @@ temperature = st.sidebar.slider(
     0.1, 1.0, 0.7
 )
 
-# Cache model
 @st.cache_resource
-def get_llm(model_name):
-    return load_llm(model_name)
+def get_model(model_name):
+    return load_model(model_name)
 
-llm = get_llm(MODEL_LIST[model_choice])
+generator = get_model(MODEL_LIST[model_choice])
 
-# Session chat memory
+# Chat memory
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -36,7 +35,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-user_input = st.chat_input("Ask something...")
+user_input = st.chat_input("Ask me anything...")
 
 if user_input:
     st.session_state.messages.append(
@@ -44,16 +43,19 @@ if user_input:
     )
 
     with st.chat_message("assistant"):
-        with st.spinner("Generating..."):
-            prompt = f"User: {user_input}\nAssistant:"
-            response = llm(prompt)
-            st.write(response)
+        with st.spinner("Thinking..."):
+            output = generator(
+                user_input,
+                temperature=temperature
+            )
+            reply = output[0]["generated_text"]
+            st.write(reply)
 
     st.session_state.messages.append(
-        {"role": "assistant", "content": response}
+        {"role": "assistant", "content": reply}
     )
 
-# Extra features
+# Extra
 st.sidebar.divider()
-if st.sidebar.button("🗑️ Clear Chat"):
+if st.sidebar.button("🗑 Clear Chat"):
     st.session_state.messages = []
