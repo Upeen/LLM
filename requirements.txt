@@ -5,3 +5,4 @@ accelerate
 langchain
 langchain-community
 sentencepiece
+plotly
