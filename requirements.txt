@@ -2,7 +2,4 @@ streamlit
 transformers
 torch
 accelerate
-langchain
-langchain-community
 sentencepiece
-plotly
